@@ -9,21 +9,29 @@ public class Workspace {
 	
 	private String date;
 	
+	private String chat;
+	
 	private ArrayList<User> users;
 	
 	private ArrayList<Card> playedCards;
 	
 	private ArrayList<Card> proposedCards;
 
-	public Workspace(int id, String date, ArrayList<User> users,
+	
+	
+
+	public Workspace(int id, String date, String chat, ArrayList<User> users,
 			ArrayList<Card> playedCards, ArrayList<Card> proposedCards) {
 		super();
 		this.id = id;
 		this.date = date;
+		this.chat = chat;
 		this.users = users;
 		this.playedCards = playedCards;
 		this.proposedCards = proposedCards;
 	}
+	
+	
 
 	public int getId() {
 		return id;
@@ -63,6 +71,19 @@ public class Workspace {
 
 	public void setProposedCards(ArrayList<Card> proposedCards) {
 		this.proposedCards = proposedCards;
+	}
+
+	public String getChat() {
+		return chat;
+	}
+
+	public void setChat(String chat) {
+		this.chat = chat;
+	}
+	
+	public String toString()
+	{
+		return id + " - " + users.toString();
 	}
 	
 	

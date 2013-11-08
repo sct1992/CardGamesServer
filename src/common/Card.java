@@ -84,7 +84,10 @@ public class Card {
 		this.owner = owner;
 	}
 	
-	
+	public String toString()
+	{
+		return id + " - " + name; 
+	}
 	
 	
 	

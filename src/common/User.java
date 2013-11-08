@@ -76,5 +76,9 @@ public class User {
 		this.myDeck = myDeck;
 	}
 	
+	public String toString()
+	{
+		return name + " (" +username+")"; 
+	}
 	
 }

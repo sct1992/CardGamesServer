@@ -40,9 +40,6 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
     //-----------------------------------------------------------------
 
 
-	 //-----------------------------------------------------------------
-    // Atributos de la Interfaz
-    //-----------------------------------------------------------------
 	
     //-----------------------------------------------------------------
     // Constructores
@@ -57,32 +54,12 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
     	super();
            
     }
+	
+    
+    
     //-----------------------------------------------------------------
-    // Puntos de Extensión
-    //-----------------------------------------------------------------
-	
-
-	@Override
-	public String darNombre() throws RemoteException {
-
-		return "silva";
-	}
-	
-	
-	@Override
-	public String darProducto() throws RemoteException {
-		return "hola";
-}
-	
-	
-	
-  //-----------------------------------------------------------------
     // Programa principal
     //-----------------------------------------------------------------
-
- 
-	
-	
 	
 	   /**
      * Ejecuta la aplicación
@@ -94,7 +71,7 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
     	{
 			Registry reg = LocateRegistry.createRegistry(1099);
 			reg.rebind("server", new Server());
-    		System.out.println("empeso esta mierda");
+    		System.out.println("Server Started");
     		
 		}
     	catch (Exception e) 
@@ -118,21 +95,97 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 		// TODO Auto-generated method stub
 		return false;
 	}
+
 	@Override
-	public User getUser() 
-	{
+	public User getUser(String username) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 	@Override
-	public Card getCard() 
-	{
+	public Workspace getWorkspace(int id) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 	@Override
-	public Workspace getWorkspace() 
-	{
+	public ArrayList<User> getActiveUsers(String username) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public ArrayList<Card> getCards(String username) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public ArrayList<Workspace> getMyWorkspaces(String username) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public boolean createCard(String name, String description, String imageUrl,
+			String place, String owner, String category) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public boolean addCardToDeck(String username, int cardId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public boolean removeCardFromDeck(String username, int cardId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public boolean proposeCard(int workspaceId, int cardId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public boolean voteCard(int workspaceId, int cardId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
+	public boolean sendMessage(int workspaceId, String username, String message) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+
+	@Override
+	public Workspace startGame(String username, ArrayList<String> guests) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	@Override
+	public Workspace startGame(int cardId, String username,
+			ArrayList<String> guests) {
 		// TODO Auto-generated method stub
 		return null;
 	}
