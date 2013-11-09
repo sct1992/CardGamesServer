@@ -1,27 +1,23 @@
 package server;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import uniandes.cupi2.cupiEmail.comun.mundo.ProtocoloComunicacion;
-import uniandes.cupi2.cupiEmail.servidor.mundo.comunicacion.ManejadorComunicacionesServidor;
-import uniandes.cupi2.cupiEmail.servidor.mundo.comunicacion.Mensaje;
-import uniandes.cupi2.cupiEmail.servidor.mundo.excepciones.CupiEmailServidorException;
-import uniandes.cupi2.cupiEmail.servidor.mundo.excepciones.UsuariosDesconectadoException;
-import uniandes.cupi2.cupiEmail.servidor.mundo.persistencia.ManejadorPersistencia;
+import common.Card;
+import common.Protocol;
+import common.User;
 
 
 /**
  * Clase que representa un cliente remoto conectado al servidor
  */
 public class UserSession extends Thread {
-	// -----------------------------------------------------------------
-	// Constantes
-	// -----------------------------------------------------------------
-
-	
 	
 	// -----------------------------------------------------------------
 	// Atributos
@@ -30,21 +26,99 @@ public class UserSession extends Thread {
 	/**
 	 * El usuario que ha iniciado sesión
 	 */
-	private Usuario usuario;
+	private String userName;
 
-	/**
-	 * El manejador de persistencia
-	 */
-	private ManejadorPersistencia manejadorPersistencia;
+	  /**
+     * El canal usado para comunicarse con el jugador 
+     */
+    private Socket socketJugador;
 
-	/**
-	 * El manejador de las comunicaciones
-	 */
-	private ManejadorComunicacionesServidor manejadorComunicaciones;
+    /**
+     * El flujo de escritura conectado con el jugador 
+     */
+    private PrintWriter out;
 
+    /**
+     * El flujo de lectura conectado con el jugador 
+     */
+    private BufferedReader in;
+    
 	// -----------------------------------------------------------------
 	// Constructores
 	// -----------------------------------------------------------------
 
-	
+	/**
+	 * constructor de la clase userSession que represta el canal de comunicacion de un usuario
+	 * @param sSocket socket con el usuario
+	 */
+    public UserSession ( Socket sSocket )
+    {
+    	socketJugador = sSocket;
+		try {
+			
+			in = new BufferedReader(new InputStreamReader(sSocket.getInputStream()));
+			out = new PrintWriter(sSocket.getOutputStream(), true);
+			userName= in.readLine();
+			
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+			
+		}
+    }
+
+    /**
+     * retorna el username de la sesion
+     * @return username
+     */
+	public String getUserName() {
+		return userName;
+	}
+
+	/**
+	 * metodo encargado de enviar una notificacion de refrescar un workspace
+	 * @param idWorkspace id del workspace a refrescar
+	 */
+	public void sendPushRefresh(int idWorkspace)
+	{
+
+		out.println(Protocol.REFRESH + Protocol.SEPARATOR1 + idWorkspace);
+	}
+
+	/**
+	 * metodo encargado de enviar una notificacion de nueva partida motivada por una carta
+	 * @param userCreator creador del workspace
+	 * @param cardId id de la carta a motivar
+	 * @param idThreat id temporal del workspace
+	 */
+	public void sendPushNewGameCard(String userCreator, int cardId, String idThreat) {
+		
+		out.println(Protocol.NEW_GAME_CARD + Protocol.SEPARATOR1 + userCreator + Protocol.SEPARATOR2 + cardId + Protocol.SEPARATOR2 + idThreat);
+			
+	}
+
+	/**
+	 * metodo encargado de enviar una notificacion de nueva partida
+	 * @param userCreator creador del workspace
+	 * @param idThreat id temporal del workspace
+	 */
+	public void sendPushNewGame(String userCreator, String idThreat) {
+
+		out.println(Protocol.NEW_GAME + Protocol.SEPARATOR1 + userCreator + Protocol.SEPARATOR2 + idThreat);
+		
+	}
+
+	/**
+	 * metodo encargado de enviar una notificacion de cancelacion de creacion de la partida
+	 * @param message motivo de la cancelacion
+	 */
+	public void sendPushCancel(String message) {
+		
+		out.println(Protocol.WORKSPACE_REJECTED + Protocol.SEPARATOR1 + message);
+			
+	}
+    
+    
+    
+    
 }

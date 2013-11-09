@@ -15,9 +15,13 @@ public class Card {
 	private String place;
 	
 	private User owner;
+	
+	private int votes;
 
+	
+	
 	public Card(int id, String name, String description, String imageUrl,
-			String category, String place, User owner) {
+			String category, String place, User owner, int votes) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -26,6 +30,15 @@ public class Card {
 		this.category = category;
 		this.place = place;
 		this.owner = owner;
+		this.votes = votes;
+	}
+
+	public int getVotes() {
+		return votes;
+	}
+
+	public void setVotes(int votes) {
+		this.votes = votes;
 	}
 
 	public int getId() {
