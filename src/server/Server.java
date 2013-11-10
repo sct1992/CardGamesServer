@@ -33,7 +33,14 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
     //-----------------------------------------------------------------
 
 
+	/**
+	 * workspaces activos
+	 */
+	public ArrayList<Workspace> activeWorkspaces;
 	
+	/**
+	 * 
+	 */
 	public ArrayList<UserSession> activeUsers;
 	
 	   /**
@@ -45,6 +52,12 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
      * los workspaces que se pueden crear si los jugadores aceptan jugar
      */
     private ArrayList<ThreadNewWorkspace> futuredWorkspaces;
+    
+    /**
+	 * Es el manejador de persistencia
+	 */
+	private StorageHandler storageHandler;
+	
     //-----------------------------------------------------------------
     // Constructores
     //-----------------------------------------------------------------
@@ -57,6 +70,12 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
     {
     	//TODO
     	super();
+    	try {
+			storageHandler = new StorageHandler();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
            
     }
 	
@@ -92,43 +111,42 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 		}
     }
 
-
 	    
 	@Override
 	public boolean login(String user, String password)throws Exception 
 	{
-		// TODO Auto-generated method stub
-		
-		
-		//
-		return false;
+		return storageHandler.logIn(user, password);
+			
 	}
 	@Override
 	public boolean signUp(String username, String name, String password,
 			String email) throws Exception
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return storageHandler.registerUser(name, username, password, email);
 	}
 
 	@Override
 	public User getUser(String username) {
-		// TODO Auto-generated method stub
-		return null;
+		return storageHandler.getUser(username);
 	}
 
 
 	@Override
 	public Workspace getWorkspace(int id) {
-		// TODO Auto-generated method stub
-		return null;
+		return storageHandler.getWorkspace(id);
 	}
 
 
 	@Override
 	public ArrayList<User> getActiveUsers(String username) {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<User> users = new ArrayList<User>();
+		
+		for(UserSession session: activeUsers)
+		{
+			User us = new User(0,session.getUserName(),"","","",new ArrayList<Card>());
+			users.add(us);
+		}		
+		return users;
 	}
 
 
@@ -141,30 +159,26 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 
 	@Override
 	public ArrayList<Workspace> getMyWorkspaces(String username) {
-		// TODO Auto-generated method stub
-		return null;
+		return storageHandler.getUserWorkspaces(username);
 	}
 
 
 	@Override
 	public boolean createCard(String name, String description, String imageUrl,
 			String place, String owner, String category) throws Exception{
-		// TODO Auto-generated method stub
-		return false;
+		return storageHandler.createCard(name, description, imageUrl, category, place, owner);
 	}
 
 
 	@Override
 	public boolean addCardToDeck(String username, int cardId) {
-		// TODO Auto-generated method stub
-		return false;
+		return storageHandler.addCardToDeck(username, cardId);
 	}
 
 
 	@Override
 	public boolean removeCardFromDeck(String username, int cardId) {
-		// TODO Auto-generated method stub
-		return false;
+		return storageHandler.removeCardfromDeck(username, cardId);
 	}
 
 
@@ -191,8 +205,7 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 
 	@Override
 	public Card getCard(int id) {
-		// TODO Auto-generated method stub
-		return null;
+		return storageHandler.getCard(id);
 	}
 
 	/**
@@ -324,10 +337,11 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 		buscado.confirm();
 		if(buscado.readyToCreate())
 		{
-			//TODO en este punto toca crear el juego a partir del thread
+			//en este punto toca crear el juego a partir del thread
 			// se guarda en bd y se envia el id del workspace recien creado o cargado
+			Workspace work = storageHandler.createWorkspace(buscado.getUsernamesList());
 			
-			int idWorkspace = -1;
+			int idWorkspace = work.getId();
 			buscado.sendConfirmation(idWorkspace);
 		}
 		return true;

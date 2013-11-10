@@ -2,6 +2,10 @@ package common;
 
 public class Card {
 
+	public static final String PROPOSED = "PROPOSED";
+
+	public static final String ACCEPTED = "ACCEPTED";
+	
 	private int id;
 	
 	private String name;
@@ -14,14 +18,14 @@ public class Card {
 	
 	private String place;
 	
-	private User owner;
+	private String owner;
 	
 	private int votes;
 
 	
 	
 	public Card(int id, String name, String description, String imageUrl,
-			String category, String place, User owner, int votes) {
+			String category, String place, String owner, int votes) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -89,19 +93,17 @@ public class Card {
 		this.place = place;
 	}
 
-	public User getOwner() {
+	public String getOwner() {
 		return owner;
 	}
 
-	public void setOwner(User owner) {
+	public void setOwner(String owner) {
 		this.owner = owner;
 	}
 	
 	public String toString()
 	{
 		return id + " - " + name; 
-	}
-	
-	
+	}	
 	
 }

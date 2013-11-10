@@ -199,6 +199,22 @@ public class ThreadNewWorkspace extends Thread {
 		return (users.size()==confirms);
 	}
 
+	
+	/**
+	 * Método que retorna los usernames de los usuarios asociados al workspace como una lista
+	 * @return Lista que contiene los usernames
+	 */
+	public ArrayList<String> getUsernamesList()
+	{
+		ArrayList<String> list = new ArrayList<String>();
+		
+		for(UserSession session: users)
+		{
+			list.add(session.getUserName());
+		}
+		list.add(userCreator.getUserName());
+		return list;
+	}
 	   
 
 }

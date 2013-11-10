@@ -81,7 +81,6 @@ public class UserSession extends Thread {
 	 */
 	public void sendPushRefresh(int idWorkspace)
 	{
-
 		out.println(Protocol.REFRESH + Protocol.SEPARATOR1 + idWorkspace);
 	}
 

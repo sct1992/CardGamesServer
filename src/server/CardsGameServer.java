@@ -35,7 +35,7 @@ public class CardsGameServer {
 	/**
 	 * Es el manejador de persistencia
 	 */
-	private ManejadorPersistencia manejadorPersistencia;
+//	private StorageHandler manejadorPersistencia;
 
 	/**
 	 * Es la lista de usuarios conectados
@@ -55,7 +55,7 @@ public class CardsGameServer {
 		config = new Properties();
 		try {
 			config.load(new FileInputStream("./data/servidor.properties"));
-			manejadorPersistencia = new ManejadorPersistencia(config);
+			manejadorPersistencia = new StorageHandler(config);
 		} catch (Exception e) {
 			throw new CupiEmailServidorException(e.getMessage());
 		}
