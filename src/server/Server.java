@@ -68,8 +68,9 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
      */
     public Server( ) throws RemoteException
     {
-    	//TODO
     	super();
+
+    	activeUsers = new ArrayList<UserSession>();
     	try {
 			storageHandler = new StorageHandler();
 		} catch (Exception e) {
@@ -152,7 +153,7 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 
 	@Override
 	public ArrayList<Card> getCards(String username) {
-		return storageHandler.getUserDeck(username);
+		return storageHandler.getCards(username);
 	}
 
 

@@ -1,6 +1,8 @@
 package common;
 
-public class Card {
+import java.io.Serializable;
+
+public class Card implements Serializable{
 
 	public static final String PROPOSED = "PROPOSED";
 

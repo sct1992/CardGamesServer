@@ -83,7 +83,7 @@ public class StorageHandler {
 		if (crearTabla)		{
 			
 			String sqlUsers = "create table users(id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),username varchar(32) UNIQUE NOT NULL,name varchar(50),password varchar(24),email varchar(32), PRIMARY KEY(id))";
-			String sqlCards = "create table cards(id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), name varchar(32),description varchar(50),category varchar(30),place varchar(30),imageURL varchar(100),owner integer CONSTRAINT owner_fk REFERENCES users(id), PRIMARY KEY(id))";
+			String sqlCards = "create table cards(id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), name varchar(32),description varchar(50),category varchar(30),place varchar(30),imageURL varchar(100),owner varchar(32) CONSTRAINT owner_fk REFERENCES users(username), PRIMARY KEY(id))";
 			String sqlWorkspaces = "create table workspaces(id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),chat_history varchar(1000),status varchar(30),PRIMARY KEY(id))";
 			String sqlUserCard = "create table user_card(username varchar(32) CONSTRAINT user_fk REFERENCES users(username),id_card integer CONSTRAINT card_fk REFERENCES cards(id), PRIMARY KEY (username,id_card))";
 			String sqlWorkCard ="create table workspace_card(id_workspace integer CONSTRAINT work_card_fk REFERENCES workspaces(id), id_card integer CONSTRAINT card_work_fk REFERENCES cards(id),status varchar(15),added_date timestamp,count_votes integer, PRIMARY KEY(id_workspace,id_card))";
@@ -151,7 +151,7 @@ public class StorageHandler {
 			st = connection.createStatement();		
 			ResultSet rs = st.executeQuery(query);
 			//Se valida que no exista un usuario con el mismo username
-			if(!rs.next())
+			if(rs.next())
 			{
 				throw new Exception("Ya existe un usuario registrado con ese login.");
 			}else
@@ -619,7 +619,7 @@ public class StorageHandler {
 	}	
 	
 	/**
-	 * 
+	 * Metodo que actualiza el cht del workspace
 	 * @param newMessage
 	 * @param workspaceId
 	 * @return
@@ -645,4 +645,28 @@ public class StorageHandler {
 		return false;
 	}
 	
+	/**
+	 * Método que devuelve todas las cartas que un usuario puede agregar a su baraja, es decir las cartas del 
+	 * sistema y las que han sido creadas por el mismo usuario
+	 * @param username
+	 * @return arreglo con las cartas qie puede agregar
+	 */
+	public ArrayList<Card> getCards(String username)
+	{
+		ArrayList<Card> cards = new ArrayList<Card>();
+		String query = "Select * from cards where owner ='"+username+"' OR owner = 'SISTEMA'";
+		try {
+			Statement st = connection.createStatement();
+			ResultSet rs = st.executeQuery(query);
+			while(rs.next())
+			{
+				Card card = new Card(rs.getInt(1),rs.getString(2),rs.getString("description"),rs.getString("imageURL"),rs.getString("category"),rs.getString("place"), rs.getString("owner"), 0);
+				cards.add(card);
+			}
+			st.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}		
+		return cards;
+	}
 }

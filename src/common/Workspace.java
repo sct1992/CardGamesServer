@@ -1,8 +1,9 @@
 package common;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Workspace {
+public class Workspace implements Serializable{
 
 	
 	private int id;
