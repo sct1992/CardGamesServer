@@ -71,6 +71,7 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
     	super();
 
     	activeUsers = new ArrayList<UserSession>();
+    	futuredWorkspaces = new ArrayList<ThreadNewWorkspace>();
     	try {
 			storageHandler = new StorageHandler();
 		} catch (Exception e) {
@@ -116,7 +117,9 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 	@Override
 	public boolean login(String user, String password)throws Exception 
 	{
-		return storageHandler.logIn(user, password);
+		boolean response = storageHandler.logIn(user, password);
+		
+		return response;
 			
 	}
 	@Override
@@ -222,7 +225,7 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 	 */
 	public boolean startGame(String username, ArrayList<String> guests) {
 		
-		
+		System.out.println(username+" "+guests);
 		ArrayList<UserSession> guestsUsers = new ArrayList<UserSession>();
 		
 		// cojo los ussersesion q participan en el thread
@@ -230,27 +233,31 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 		UserSession creator = null;
 		
 		for (int i = 0; i < guests.size(); i++) {
-		
+
 			String tmp = guests.get(i);
 			boolean termino = false;
 			for (int j = 0; j < activeUsers.size()&& !termino; j++) {
-				
+
 				UserSession participanteTmp = activeUsers.get(j);
-				
+
 				if(tmp.equals(participanteTmp.getUserName()))
-						{
+				{
 					termino = true;
 					guestsUsers.add(participanteTmp);
-						}
-				if(username.equals(participanteTmp.getUserName()))
-				{
-					creator=participanteTmp;
-				}	
+				}
+				
 			}
 			//si no se encontro 
 			if(termino ==false)
 			{
 				return false;
+			}
+			for(UserSession session: activeUsers)
+			{
+				if(username.equals(session.getUserName()))
+				{
+					creator=session;
+				}	
 			}
 		}
 		
@@ -260,6 +267,7 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 		}
 		
 		ThreadNewWorkspace tmp = new ThreadNewWorkspace(creator, guestsUsers, ThreadNewWorkspace.NO_CARD );
+		futuredWorkspaces.add(tmp);
 		tmp.start();
 		
 		return true;
@@ -428,9 +436,11 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
     {
     	try 
     	{
+    		Server server = new Server();
 			Registry reg = LocateRegistry.createRegistry(Protocol.PUERTO_SERVER_RMI);
-			reg.rebind(Protocol.ID_SERVER_RMI, new Server());
+			reg.rebind(Protocol.ID_SERVER_RMI, server);
     		System.out.println("Server Started");
+			server.recibirConexiones();
     		
 		}
     	catch (Exception e) 

@@ -103,11 +103,11 @@ public class ThreadNewWorkspace extends Thread {
 	        		
 	        		if(cardId!=NO_CARD)
 	        		{
-	        		tmp.sendPushNewGameCard(userCreator.getUserName(), cardId, idThread);
+	        			tmp.sendPushNewGameCard(userCreator.getUserName(), cardId, idThread);
 	        		}
 	        		else
 	        		{
-	               	tmp.sendPushNewGame(userCreator.getUserName(), idThread);
+	        			tmp.sendPushNewGame(userCreator.getUserName(), idThread);
 	        		}
 	        		
 				}

@@ -81,7 +81,7 @@ public class UserSession extends Thread {
 	 */
 	public void sendPushRefresh(int idWorkspace)
 	{
-		out.println(Protocol.REFRESH + Protocol.SEPARATOR1 + idWorkspace);
+		out.println(Protocol.REFRESH + Protocol.SEPARATOR1 + idWorkspace+Protocol.SEPARATOR2+true);
 	}
 
 	/**
@@ -103,6 +103,7 @@ public class UserSession extends Thread {
 	 */
 	public void sendPushNewGame(String userCreator, String idThreat) {
 
+		System.out.println("Esta enviando push "+ idThreat);
 		out.println(Protocol.NEW_GAME + Protocol.SEPARATOR1 + userCreator + Protocol.SEPARATOR2 + idThreat);
 		
 	}

@@ -234,7 +234,7 @@ public class StorageHandler {
 	 */
 	public Workspace getWorkspace(int id)
 	{		
-		String query2 = "select * from workspace where id="+id;
+		String query2 = "select * from workspaces where id="+id;
 		
 		Statement st;
 		try {
@@ -275,9 +275,10 @@ public class StorageHandler {
 			while(rs.next())
 			{
 				int id = rs.getInt(1);
-				String query2 = "select * from workspace where id="+id;
-				ResultSet rs2 = st.executeQuery(query2);
-				if(rs.next())
+				String query2 = "select * from workspaces where id="+id;
+				Statement st2 = connection.createStatement();
+				ResultSet rs2 = st2.executeQuery(query2);
+				if(rs2.next())
 				{
 					//Se arma cada workspace con sus usaurios y cartas
 					String chatHistory = rs2.getString(2);
@@ -288,7 +289,8 @@ public class StorageHandler {
 					
 					Workspace work = new Workspace(id, chatHistory, users, accepted, proposed);
 					works.add(work);
-				}				
+				}	
+				st2.close();
 			}
 			st.close();
 		} catch (SQLException e) {
@@ -305,7 +307,7 @@ public class StorageHandler {
 	public ArrayList<User> getUsersWork(int workspaceid)
 	{
 		ArrayList<User> users = new ArrayList<User>();
-		String query ="select users.* from users,workspace_user where workspace_user.id_user=users.id AND workspace_user.id_workspace="+workspaceid;
+		String query ="select users.* from users,workspace_user where workspace_user.username=users.username AND workspace_user.id_workspace="+workspaceid;
 		try {
 			Statement st = connection.createStatement();
 			ResultSet rs = st.executeQuery(query);
