@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import common.Card;
@@ -133,13 +134,13 @@ public class StorageHandler {
 	// -----------------------------------------------------------------
 
 	/**
-	 * 
+	 * Metodo que registra un nuevo usuario en el sistema
 	 * @param name
 	 * @param username
 	 * @param password
 	 * @param email
-	 * @return
-	 * @throws Exception
+	 * @return true en caso de que se haya registrado correctamente, false de lo contrario
+	 * @throws Exception en caso de que ya existe un usuario con el login ingresado
 	 */
 	public boolean registerUser(String name, String username, String password, String email)throws Exception
 	{
@@ -162,39 +163,40 @@ public class StorageHandler {
 				return true;
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;	
 	}
 	
 	/**
-	 * 
+	 * Metodo que actualiza la información de un usuario
 	 * @param password
 	 * @param email
-	 * @return
+	 * @return true en caso exitoso, false de lo contrario
 	 */
 	public boolean updateUser(String password, String email)
 	{
+		//TODO
 		return false;
 	}
 	
 	/**
-	 * 
+	 * Método que elimina un usuario dado su login
 	 * @param username
-	 * @return
+	 * @return true en caso exitoso, false de lo contrario
 	 */
 	public boolean deleteUser(String username)
 	{
+		//TODO
 		return false;
 	}
 	
 	/**
-	 * 
+	 * Método que permite iniciar sesión aun usuario dado su usuario y su contraseña
 	 * @param username
 	 * @param password
-	 * @return
-	 * @throws Exception
+	 * @return true en caso de que las credenciales sean correctas, false de lo contrario
+	 * @throws Exception en caso de que no exista el usuario o la contraseña sea incorrecta
 	 */
 	public boolean logIn(String username, String password)throws Exception
 	{
@@ -220,16 +222,15 @@ public class StorageHandler {
 				throw new Exception("No existe un usuario registrado con ese login");
 			}			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 		return false;
 	}
 	
 	/**
-	 * 
+	 * Método que retorna un Workspace dado su Id
 	 * @param id
-	 * @return
+	 * @return el workspace esperado
 	 */
 	public Workspace getWorkspace(int id)
 	{		
@@ -253,15 +254,14 @@ public class StorageHandler {
 				return work;
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 	}
 	/**
-	 * 
-	 * @param username
-	 * @return
+	 * Retorna los workspaces en los que participa un usuario
+	 * @param username del usuario buscado
+	 * @return Arreglo con los workspaces en los que el usuario participa
 	 */
 	public ArrayList<Workspace> getUserWorkspaces(String username)
 	{		
@@ -292,16 +292,15 @@ public class StorageHandler {
 			}
 			st.close();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return works;
 	}
 	
 	/**
-	 * 
+	 * Retorna los usuarios que partenecen a un workspace
 	 * @param workspaceid
-	 * @return
+	 * @return Arreglo con los usuarios participantes en un workspace
 	 */
 	public ArrayList<User> getUsersWork(int workspaceid)
 	{
@@ -318,21 +317,20 @@ public class StorageHandler {
 			}
 			st.close();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return users;
 	}
 	
 	/**
-	 * 
+	 * Retorna las cartas que han sido propuestas en un workspace pero q no han sido aceptadas
 	 * @param workspaceId
-	 * @return
+	 * @return Arreglo con las cartas propuestas de un workspace
 	 */
 	public ArrayList<Card> getProposedCardsWork(int workspaceId)
 	{
 		ArrayList<Card> cards = new ArrayList<>();
-		String query = "select cards.*,workspace_card.count_votes from cards,workspace_card where cards.id = workspace_card.id_card AND workspace_card.status='"+Card.PROPOSED+"' AND workspace_card.id_workspace="+workspaceId;
+		String query = "select cards.*,workspace_card.count_votes from cards,workspace_card where cards.id = workspace_card.id_card AND workspace_card.status='"+Card.PROPOSED+"' AND workspace_card.id_workspace="+workspaceId+" order by workspace_card.added_date";
 		try {
 			Statement st = connection.createStatement();
 			ResultSet rs = st.executeQuery(query);
@@ -343,7 +341,6 @@ public class StorageHandler {
 			}
 			st.close();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -351,14 +348,14 @@ public class StorageHandler {
 	}
 	
 	/**
-	 * 
+	 * Retorna las cartas que han sido propuestas en un workspace y que han sido aceptadas
 	 * @param workspaceId
-	 * @return
+	 * @return Arreglo con las cartas jugadas de un workspace
 	 */
 	public ArrayList<Card> getPlayedCardsWork(int workspaceId)
 	{
 		ArrayList<Card> cards = new ArrayList<>();
-		String query = "select cards.*,workspace_card.count_votes from cards,workspace_card where cards.id = workspace_card.id_card AND workspace_card.status='"+Card.ACCEPTED+"' AND workspace_card.id_workspace="+workspaceId;
+		String query = "select cards.*,workspace_card.count_votes from cards,workspace_card where cards.id = workspace_card.id_card AND workspace_card.status='"+Card.ACCEPTED+"' AND workspace_card.id_workspace="+workspaceId+" order by workspace_card.added_date";
 		try {
 			Statement st = connection.createStatement();
 			ResultSet rs = st.executeQuery(query);
@@ -369,7 +366,6 @@ public class StorageHandler {
 			}
 			st.close();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -377,14 +373,14 @@ public class StorageHandler {
 	}
 	
 	/**
-	 * 
+	 * Método que permite agregar una carta al sistema
 	 * @param name
 	 * @param description
-	 * @param imageURL
+	 * @param imageURL Url de la imagen asociada a la carta
 	 * @param category
 	 * @param place
-	 * @param owner
-	 * @return
+	 * @param owner Usuario creador de la carta
+	 * @return True en caso de que se cree la carta exitosamente, false de lo contrario.
 	 */
 	public boolean createCard(String name, String description, String imageURL, String category, String place, String owner)
 	{
@@ -395,16 +391,15 @@ public class StorageHandler {
 			st.close();
 			return true;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;
 	}
 	
 	/**
-	 * 
-	 * @param users
-	 * @return
+	 * Método que crea un workspace a partir de la lista de usuarios participantes
+	 * @param users Arreglo con los nombre de usuario de los jugadores
+	 * @return el Workspace creado
 	 */
 	public Workspace createWorkspace(ArrayList<String> usernames)
 	{
@@ -433,16 +428,15 @@ public class StorageHandler {
 	        }
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 		return null;
 	}
 	
 	/**
-	 * 
+	 * Obtiene el arreglo de Usuario (User) a partir de un arreglo de strings con sus username
 	 * @param usernames
-	 * @return
+	 * @return Arreglo con los usuarios buscados
 	 */
 	public ArrayList<User> getUsersArray(ArrayList<String> usernames)
 	{
@@ -462,7 +456,6 @@ public class StorageHandler {
 				}		
 				st.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -470,21 +463,30 @@ public class StorageHandler {
 	}
 	
 	/**
-	 * 
-	 * @param workspaceId
+	 * Método que permite realizar un voto sobre una carta en un workspace
+	 * @param workspaceId 
 	 * @param cardId
-	 * @return
+	 * @return true en caso de registrar el voto correctamente, false de lo contrario.
 	 */
 	public boolean voteCard(int workspaceId, int cardId)
 	{
+		String sql = "update workspace_card set count_votes = count_votes +1 where id_workspace="+workspaceId+" AND id_card = "+cardId;
+		try {
+			Statement st = connection.createStatement();
+			st.executeUpdate(sql);
+			st.close();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}		
 		return false;
 	}
 	
 	/**
-	 * 
+	 * Método que agrega una carta a la baraja de un usuario
 	 * @param username
 	 * @param cardId
-	 * @return
+	 * @return true en caso de que se agregue sin problema, false de lo contrario
 	 */
 	public boolean addCardToDeck(String username, int cardId)
 	{
@@ -495,17 +497,16 @@ public class StorageHandler {
 			st.close();
 			return true;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;
 	}
 	
 	/**
-	 * 
+	 * Método que elimina una carta de la baraja de un usuario
 	 * @param username
 	 * @param cardId
-	 * @return
+	 * @return true en caso de que se elimine sin problema, false de lo contrario
 	 */
 	public boolean removeCardfromDeck(String username,int cardId)
 	{
@@ -516,7 +517,28 @@ public class StorageHandler {
 			st.close();
 			return true;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		return false;
+	}
+	
+	/**
+	 * Método que permite proponer una carta en un workspace
+	 * @param cardId
+	 * @param workspaceId
+	 * @return true en caso de que se realice de manera exitosa, false de lo contrario
+	 */
+	public boolean proposeCard(int cardId, int workspaceId)
+	{
+		//Se crea el timestamp del momento en q se propone la carta
+		Timestamp ts = new Timestamp(System.currentTimeMillis());
+		String sql = "insert into workspace_card(id_card,id_workspace,count_votes,added_date,status)values("+cardId+","+workspaceId+",0,'"+ts+"','"+Card.PROPOSED+"')";
+		try {
+			Statement st = connection.createStatement();
+			st.executeUpdate(sql);
+			st.close();
+			return true;
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
@@ -524,20 +546,9 @@ public class StorageHandler {
 	}
 	
 	/**
-	 * 
-	 * @param cardId
-	 * @param workspaceId
-	 * @return
-	 */
-	public boolean proposeCard(int cardId, int workspaceId)
-	{
-		return false;
-	}
-	
-	/**
-	 * 
-	 * @param rs
-	 * @return
+	 * Método que obtiene la información de un usuario
+	 * @param username
+	 * @return objeto User con los datos de usuario
 	 */
 	public User getUser(String username)
 	{
@@ -553,19 +564,19 @@ public class StorageHandler {
 				String email = rs.getString(5);
 				ArrayList<Card> deck = getUserDeck(username);				
 				User us = new User(id,username,name,"",email, deck);
+				st.close();
 				return us;
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
 	/**
-	 * 
+	 * Método que obtiene la baraja de un usuario
 	 * @param username
-	 * @return
+	 * @return Arreglo con las cartas que hacen parte de la baraja del usuario
 	 */
 	public ArrayList<Card> getUserDeck(String username)
 	{
@@ -579,17 +590,16 @@ public class StorageHandler {
 				Card card = new Card(rs.getInt(1),rs.getString(2),rs.getString("description"),rs.getString("imageURL"),rs.getString("category"),rs.getString("place"), rs.getString("owner"), 0);
 				deck.add(card);
 			}
+			st.close();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return deck;
-	}
-	
+	}	
 	/**
-	 * 
+	 * Método que obtiene la información de una carta dado su Id
 	 * @param id
-	 * @return
+	 * @return objeto Card con la información de la carta buscada
 	 */
 	public Card getCard(int id)
 	{
@@ -599,13 +609,40 @@ public class StorageHandler {
 			ResultSet rs = st.executeQuery(query);
 			if(rs.next()){
 				Card card = new Card(id,rs.getString(2),rs.getString("description"),rs.getString("imageURL"),rs.getString("category"),rs.getString("place"), rs.getString("owner"), 0);
+				st.close();
 				return card;
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
+	}	
+	
+	/**
+	 * 
+	 * @param newMessage
+	 * @param workspaceId
+	 * @return
+	 */
+	public boolean updateChatHistory(String newMessage,int workspaceId)
+	{
+		String query = "select chat_history from workspaces where id ="+workspaceId;
+		try {
+			Statement st = connection.createStatement();
+			ResultSet rs = st.executeQuery(query);
+			if(rs.next())
+			{
+				StringBuffer chat = new StringBuffer(rs.getString(1));
+				chat.append(newMessage+"\n\r");
+				String update ="update workspaces set chat_history="+chat.toString()+" where id ="+workspaceId;
+				st.executeUpdate(update);
+				st.close();
+				return true;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 	
 }

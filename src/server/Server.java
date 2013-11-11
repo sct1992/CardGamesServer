@@ -152,8 +152,7 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 
 	@Override
 	public ArrayList<Card> getCards(String username) {
-		// TODO Auto-generated method stub
-		return null;
+		return storageHandler.getUserDeck(username);
 	}
 
 
@@ -184,21 +183,28 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 
 	@Override
 	public boolean proposeCard(int workspaceId, int cardId) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean response = storageHandler.proposeCard(cardId, workspaceId);
+		if (response)
+			sendNotifyRefresh(workspaceId);
+		return response;
 	}
 
 
 	@Override
 	public boolean voteCard(int workspaceId, int cardId) {
-		// TODO Auto-generated method stub
-		return false;
+		boolean response = storageHandler.voteCard(workspaceId, cardId);
+		if (response)
+			sendNotifyRefresh(workspaceId);
+		return response;
 	}
 
 
 	@Override
 	public boolean sendMessage(int workspaceId, String username, String message) {
-		// TODO Auto-generated method stub
+		String the_message = username+" dijo: "+message;
+		boolean response = storageHandler.updateChatHistory(the_message, workspaceId);
+		if(response)
+			sendNotifyRefresh(workspaceId);
 		return false;
 	}
 
