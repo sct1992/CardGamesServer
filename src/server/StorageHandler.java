@@ -331,7 +331,7 @@ public class StorageHandler {
 	 */
 	public ArrayList<Card> getProposedCardsWork(int workspaceId)
 	{
-		ArrayList<Card> cards = new ArrayList<>();
+		ArrayList<Card> cards = new ArrayList<Card>();
 		String query = "select cards.*,workspace_card.count_votes from cards,workspace_card where cards.id = workspace_card.id_card AND workspace_card.status='"+Card.PROPOSED+"' AND workspace_card.id_workspace="+workspaceId+" order by workspace_card.added_date";
 		try {
 			Statement st = connection.createStatement();
@@ -356,7 +356,7 @@ public class StorageHandler {
 	 */
 	public ArrayList<Card> getPlayedCardsWork(int workspaceId)
 	{
-		ArrayList<Card> cards = new ArrayList<>();
+		ArrayList<Card> cards = new ArrayList<Card>();
 		String query = "select cards.*,workspace_card.count_votes from cards,workspace_card where cards.id = workspace_card.id_card AND workspace_card.status='"+Card.ACCEPTED+"' AND workspace_card.id_workspace="+workspaceId+" order by workspace_card.added_date";
 		try {
 			Statement st = connection.createStatement();
@@ -434,6 +434,7 @@ public class StorageHandler {
 		}		
 		return null;
 	}
+	
 	
 	/**
 	 * Obtiene el arreglo de Usuario (User) a partir de un arreglo de strings con sus username

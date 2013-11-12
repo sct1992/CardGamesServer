@@ -115,9 +115,8 @@ public class ThreadNewWorkspace extends Thread {
 	        	// se inicia un temporizador, si alguien cancela o pasan 15 seg se termina
 	        	int confirmsNeeded=users.size();	        	
 	        	long millisPassed = System.currentTimeMillis()-timeStamp;
-	            while(confirms<confirmsNeeded && millisPassed < 15000 && rejects==0)
+	            while(confirms<confirmsNeeded && millisPassed < 1500000 && rejects==0)
 	            {
-	            	wait(500);
 	            	millisPassed = System.currentTimeMillis()-timeStamp;
 	            }
 	                        

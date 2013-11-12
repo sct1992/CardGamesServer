@@ -2,7 +2,7 @@ package common;
 
 public class Protocol {
 
-	public static int PUERTO_SERVER_SOCKET = 9999; 
+	public static int PUERTO_SERVER_SOCKET = 1075; 
 	
 	public static int PUERTO_SERVER_RMI=1069;
 	

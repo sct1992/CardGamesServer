@@ -117,7 +117,10 @@ public class UserSession extends Thread {
 		out.println(Protocol.WORKSPACE_REJECTED + Protocol.SEPARATOR1 + message);
 			
 	}
-    
+    public String toString()
+    {
+    	return userName;
+    }
     
     
     

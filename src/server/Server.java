@@ -145,11 +145,25 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 	public ArrayList<User> getActiveUsers(String username) {
 		ArrayList<User> users = new ArrayList<User>();
 		
-		for(UserSession session: activeUsers)
-		{
-			User us = new User(0,session.getUserName(),"","","",new ArrayList<Card>());
-			users.add(us);
-		}		
+		
+		
+		for (int i = 0; i < activeUsers.size(); i++) {
+			
+			UserSession tmp = activeUsers.get(i);
+			
+			if (tmp.isAlive())
+			{
+				User us = new User(0,tmp.getUserName(),"","","",new ArrayList<Card>());
+				users.add(us);
+			}
+			else
+			{
+			activeUsers.remove(i);
+			i--;
+			}
+			
+		}
+			
 		return users;
 	}
 
@@ -252,13 +266,14 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 			{
 				return false;
 			}
-			for(UserSession session: activeUsers)
+
+		}
+		for(UserSession session: activeUsers)
+		{
+			if(username.equals(session.getUserName()))
 			{
-				if(username.equals(session.getUserName()))
-				{
-					creator=session;
-				}	
-			}
+				creator=session;
+			}	
 		}
 		
 		if(creator == null)
@@ -354,9 +369,11 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 		{
 			//en este punto toca crear el juego a partir del thread
 			// se guarda en bd y se envia el id del workspace recien creado o cargado
+			//TODO TOCA CARGAR EL WORKSPACE CON LOS USUARIOS, SI NO HAY UN USUARIO 
 			Workspace work = storageHandler.createWorkspace(buscado.getUsernamesList());
 			
 			int idWorkspace = work.getId();
+			
 			buscado.sendConfirmation(idWorkspace);
 		}
 		return true;
