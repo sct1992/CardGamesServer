@@ -2,6 +2,8 @@ package common;
 
 public class Protocol {
 
+	public static final String CLOSED_GAME = "CLOSED_GAME";
+
 	public static int PUERTO_SERVER_SOCKET = 1075; 
 	
 	public static int PUERTO_SERVER_RMI=1069;

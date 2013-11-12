@@ -10,21 +10,21 @@ public interface InterfaceServer extends Remote
 	
 	public boolean signUp(String username, String name, String password, String email) throws Exception;
 	
-	public User getUser(String username)throws Exception;
+	public User getUser(String username) throws Exception;
 	
-	public Card getCard(int id)throws Exception;
+	public Card getCard(int id) throws Exception;
 	
-	public Workspace getWorkspace(int id)throws Exception; 
+	public Workspace getWorkspace(int id) throws Exception;
 	
-	public ArrayList<User> getActiveUsers(String username)throws Exception;
+	public ArrayList<User> getActiveUsers(String username) throws Exception;
 	
-	public ArrayList<Card> getCards(String username)throws Exception;
+	public ArrayList<Card> getCards(String username) throws Exception;
 	
-	public ArrayList<Workspace> getMyWorkspaces( String username)throws Exception;
+	public ArrayList<Workspace> getMyWorkspaces( String username) throws Exception;
 	
 	public boolean createCard( String name, String description, String imageUrl, String place, String owner, String category) throws Exception;
 	
-	public boolean addCardToDeck( String username, int cardId)throws Exception;
+	public boolean addCardToDeck( String username, int cardId) throws Exception;
 	
 	public boolean removeCardFromDeck(String username, int cardId)throws Exception;
 	
@@ -41,5 +41,11 @@ public interface InterfaceServer extends Remote
 	public boolean acceptGame(String threadId, String username)throws Exception;
 
 	public boolean rejectGame(String threadId, String username)throws Exception;
+
+	public void quit(String username)throws Exception;
+
+	public ArrayList<Card> getMyCards(String username) throws Exception;
+
+	public void quitWorkspace(String username, int workspace) throws Exception;
 	
 }

@@ -158,11 +158,11 @@ public class ThreadNewWorkspace extends Thread {
 	 */
 	public void sendConfirmation(int idWorkspace)
 	{
-    	userCreator.sendPushRefresh(idWorkspace);
+    	userCreator.sendPushRefresh(idWorkspace,true);
     	
     	for (int i = 0; i < users.size(); i++) {
     		UserSession tmp = users.get(i);
-    		tmp.sendPushRefresh(idWorkspace);
+    		tmp.sendPushRefresh(idWorkspace,true);
 		}
     
 	}

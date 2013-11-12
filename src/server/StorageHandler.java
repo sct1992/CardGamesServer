@@ -246,7 +246,7 @@ public class StorageHandler {
 				String chatHistory = rs.getString(2);
 				String status = rs.getString(3);
 				ArrayList<Card> proposed = getProposedCardsWork(id);
-				ArrayList<Card> accepted = getProposedCardsWork(id);
+				ArrayList<Card> accepted = getPlayedCardsWork(id);
 				ArrayList<User> users = getUsersWork(id);
 
 				Workspace work = new Workspace(id, chatHistory, users, accepted, proposed);
@@ -284,7 +284,7 @@ public class StorageHandler {
 					String chatHistory = rs2.getString(2);
 					String status = rs2.getString(3);
 					ArrayList<Card> proposed = getProposedCardsWork(id);
-					ArrayList<Card> accepted = getProposedCardsWork(id);
+					ArrayList<Card> accepted = getPlayedCardsWork(id);
 					ArrayList<User> users = getUsersWork(id);
 					
 					Workspace work = new Workspace(id, chatHistory, users, accepted, proposed);
@@ -635,9 +635,14 @@ public class StorageHandler {
 			ResultSet rs = st.executeQuery(query);
 			if(rs.next())
 			{
-				StringBuffer chat = new StringBuffer(rs.getString(1));
-				chat.append(newMessage+"\n\r");
-				String update ="update workspaces set chat_history="+chat.toString()+" where id ="+workspaceId;
+				String chat = newMessage + "\n\r" + rs.getString(1);
+				if(chat.length()>950)
+				{
+					chat=chat.substring(0, 950);
+				}
+				
+				
+				String update ="update workspaces set chat_history='"+chat+"' where id ="+workspaceId;
 				st.executeUpdate(update);
 				st.close();
 				return true;

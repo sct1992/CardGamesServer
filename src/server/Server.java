@@ -68,14 +68,12 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
      */
     public Server( ) throws RemoteException
     {
-    	super();
-
     	activeUsers = new ArrayList<UserSession>();
     	futuredWorkspaces = new ArrayList<ThreadNewWorkspace>();
     	try {
 			storageHandler = new StorageHandler();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
            
@@ -97,6 +95,7 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
                    Socket socketJugador = receptor.accept( );
                    UserSession tmp = new UserSession(socketJugador);
                    activeUsers.add(tmp);	
+                   tmp.start();
 			}
 		}
 		catch (Exception e) 
@@ -117,6 +116,14 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 	@Override
 	public boolean login(String user, String password)throws Exception 
 	{
+         for (int i = 0; i < activeUsers.size(); i++) {
+			
+			UserSession tmp = activeUsers.get(i);
+			if(tmp.getUserName().equalsIgnoreCase(user))
+			{
+				return false;
+			}
+		}
 		boolean response = storageHandler.logIn(user, password);
 		
 		return response;
@@ -143,6 +150,7 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 
 	@Override
 	public ArrayList<User> getActiveUsers(String username) {
+	
 		ArrayList<User> users = new ArrayList<User>();
 		
 		
@@ -153,11 +161,13 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 			
 			if (tmp.isAlive())
 			{
+				System.out.println("vivo");
 				User us = new User(0,tmp.getUserName(),"","","",new ArrayList<Card>());
 				users.add(us);
 			}
 			else
 			{
+				System.out.println("muerto");
 			activeUsers.remove(i);
 			i--;
 			}
@@ -211,6 +221,8 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 	@Override
 	public boolean voteCard(int workspaceId, int cardId) {
 		boolean response = storageHandler.voteCard(workspaceId, cardId);
+		//VERIFICAR SI CUMPLE CON LA VOTACIO SUFICIENTE PARA JUGARLA
+		//TODO
 		if (response)
 			sendNotifyRefresh(workspaceId);
 		return response;
@@ -367,9 +379,10 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 		buscado.confirm();
 		if(buscado.readyToCreate())
 		{
-			//en este punto toca crear el juego a partir del thread
-			// se guarda en bd y se envia el id del workspace recien creado o cargado
-			//TODO TOCA CARGAR EL WORKSPACE CON LOS USUARIOS, SI NO HAY UN USUARIO 
+			
+			//----------------------------------------------------
+			//TODO toca tener en cuenta cuando ya se ha creado el workspace (O SE CREA O SE CARGA)
+			//----------------------------------------------------
 			Workspace work = storageHandler.createWorkspace(buscado.getUsernamesList());
 			
 			int idWorkspace = work.getId();
@@ -412,27 +425,24 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 	/**
 	 * 
 	 * @param idWorkspace
-	 * @param commandPush debe ser REFRESH, NEW_GAME;p1:p2:p3:...:pn, NEW_GAME_CARD;p1:p2:p3:...:pn
+	 * @param commandPush 
 	 */
 	private void sendNotifyRefresh(int idWorkspace)
 	{
-		//buscar usuarios del workspace por parametro
-		// realizar push de Refresh
-		//TODO completar,
-		// en la clase participantesno se debe inicializar de ceros, se supone que estan los users del workspace
-		ArrayList<User> participantes = new ArrayList<User>();
 		
-		for (int i = 0; i < activeUsers.size(); i++) {
+		ArrayList<User> participantes = getWorkspace(idWorkspace).getUsers();
 		
-			UserSession tmp = activeUsers.get(i);
+		for (int i = 0; i < participantes.size(); i++) {
+		
+			User tmp = participantes.get(i);
 			
-			for (int j = 0; j < participantes.size(); j++) {
+			for (int j = 0; j < activeUsers.size(); j++) {
 				
-				User participanteTmp = participantes.get(j);
+				UserSession participante = activeUsers.get(j);
 				
-				if(tmp.getUserName().equals(participanteTmp.getUsername()))
+				if(tmp.getUsername().equals(participante.getUserName()))
 						{
-						tmp.sendPushRefresh(idWorkspace);
+						participante.sendPushRefresh(idWorkspace,false);
 						break;
 						}
 			}
@@ -466,6 +476,54 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 		}
      
     }
+
+
+	@Override
+	public void quit(String username) {
+		
+		
+		//------------------------------------------
+		//solo mato los thread, lo que me hace no visible al jugador que acabo de cerrar su programa
+		// sin embargo tocaria contemplar el cerrar los workspaces
+		//------------------------------------------
+		for (int i = 0; i < activeUsers.size(); i++) {
+			
+			UserSession tmp = activeUsers.get(i);
+			
+			if(tmp.getUserName().equalsIgnoreCase(username))
+			{
+				tmp.killThreat();
+				activeUsers.remove(i);
+				return;
+			}
+		}
+		
+		// cerrar workspaces TODO
+		
+	}
+
+
+	//----------------------------------------------------
+	// retornas la baraja del man, (las que ha seleccionado)
+	//----------------------------------------------------
+	public ArrayList<Card> getMyCards(String username) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public void quitWorkspace(String username, int workspace) throws Exception {
+
+		//cerrar workspace en bd
+		//notificar a todos los usuarios con el siguiente metodo
+		
+		UserSession d=null ;
+		d.sendPushClosedGame(-1, "prueba");
+		
+		//TODO
+		
+	}
 
 
 

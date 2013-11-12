@@ -23,6 +23,7 @@ public class UserSession extends Thread {
 	// Atributos
 	// -----------------------------------------------------------------
 
+	private boolean estado;
 	/**
 	 * El usuario que ha iniciado sesión
 	 */
@@ -59,6 +60,7 @@ public class UserSession extends Thread {
 			in = new BufferedReader(new InputStreamReader(sSocket.getInputStream()));
 			out = new PrintWriter(sSocket.getOutputStream(), true);
 			userName= in.readLine();
+			estado = true;
 			
 		} catch (Exception e) {
 			
@@ -66,7 +68,30 @@ public class UserSession extends Thread {
 			
 		}
     }
+    
 
+	/**
+	 * Método que se invoca cuando inicia la ejecución del thread
+	 */
+	   public void run( )
+	    {
+	        try
+	        {
+	            while( estado )
+	            {
+	            	
+	            }
+	        }
+	        catch( Exception e )
+	        {
+	        }
+	    }
+	   
+
+	   public void killThreat()
+	   {
+		   estado = false;
+	   }
     /**
      * retorna el username de la sesion
      * @return username
@@ -79,11 +104,17 @@ public class UserSession extends Thread {
 	 * metodo encargado de enviar una notificacion de refrescar un workspace
 	 * @param idWorkspace id del workspace a refrescar
 	 */
-	public void sendPushRefresh(int idWorkspace)
+	public void sendPushRefresh(int idWorkspace, boolean onTop)
 	{
-		out.println(Protocol.REFRESH + Protocol.SEPARATOR1 + idWorkspace+Protocol.SEPARATOR2+true);
+		out.println(Protocol.REFRESH + Protocol.SEPARATOR1 + idWorkspace+Protocol.SEPARATOR2+onTop);
 	}
 
+	public void sendPushClosedGame(int idWorkspace, String userThatQuits)
+	{
+		out.println(Protocol.CLOSED_GAME + Protocol.SEPARATOR1 + idWorkspace+Protocol.SEPARATOR2+userThatQuits);
+	}
+
+	
 	/**
 	 * metodo encargado de enviar una notificacion de nueva partida motivada por una carta
 	 * @param userCreator creador del workspace
