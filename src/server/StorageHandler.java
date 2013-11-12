@@ -672,4 +672,40 @@ public class StorageHandler {
 		}		
 		return cards;
 	}
+	
+	/**
+	 * Método que obtiene un workspace a partir de los usuarios que participan en el
+	 * @param usernames 
+	 * @return el workspace con los usuarios, o null si no existe un workspace con estos usuarios.
+	 */
+	public Workspace getWorkspaceFromUsers(ArrayList<String> usernames)
+	{
+		StringBuffer set = new StringBuffer("(");
+		for(int i =0; i < usernames.size();i++)
+		{
+			String username = usernames.get(i);
+			if(i == usernames.size()-1)
+				set.append("'"+username+"',");
+			else
+				set.append("'"+username+"'");				
+		}
+		set.append(")");
+		//Busco el id del workspace en el que participan todos los usuarios
+		String sql = "select result.id_workspace from (select workspace_user.id_workspace,count(username) as veces from workspace_user where username IN "+set.toString()+" group by id_workspace) as result where result.veces ="+usernames.size();
+		try {
+			Statement st = connection.createStatement();
+			ResultSet rs = st.executeQuery(sql);
+			if(rs.next())
+			{
+				int workID = rs.getInt(1);
+				st.close();
+				Workspace work = getWorkspace(workID);
+				return work;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
 }
