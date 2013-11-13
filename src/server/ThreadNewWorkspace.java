@@ -137,7 +137,11 @@ public class ThreadNewWorkspace extends Thread {
 	        }
 	    }
 
-	   /**
+	   public int getCardId() {
+		return cardId;
+	}
+
+	/**
 	    * envia a todos los particiapntes un anuncion de cancelacion de la partida
 	    * @param message el motivo de la cancelacion
 	    */
@@ -195,7 +199,7 @@ public class ThreadNewWorkspace extends Thread {
 	 */
 	public boolean readyToCreate() {
 		
-		return (users.size()==confirms);
+		return (users.size()<=confirms);
 	}
 
 	

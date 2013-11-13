@@ -259,7 +259,7 @@ public class StorageHandler {
 		return null;
 	}
 	/**
-	 * Retorna los workspaces en los que participa un usuario
+	 * Retorna los workspaces activos en los que participa un usuario
 	 * @param username del usuario buscado
 	 * @return Arreglo con los workspaces en los que el usuario participa
 	 */
@@ -267,7 +267,7 @@ public class StorageHandler {
 	{		
 		ArrayList<Workspace> works = new ArrayList<Workspace>();
 		//Se obtiene los ids de los workspaces en donde el usuario participa
-		String query1 ="Select id_workspace from workspace_user where username='"+username+"'";
+		String query1 ="Select id_workspace from workspace_user where username='"+username+"' ";
 		try {
 			Statement st = connection.createStatement();
 			ResultSet rs = st.executeQuery(query1);
@@ -275,7 +275,7 @@ public class StorageHandler {
 			while(rs.next())
 			{
 				int id = rs.getInt(1);
-				String query2 = "select * from workspaces where id="+id;
+				String query2 = "select * from workspaces where id="+id +" AND status = '"+Workspace.ACTIVO+"'";
 				Statement st2 = connection.createStatement();
 				ResultSet rs2 = st2.executeQuery(query2);
 				if(rs2.next())
@@ -548,7 +548,7 @@ public class StorageHandler {
 			st.close();
 			return true;
 		} catch (SQLException e) {
-			e.printStackTrace();
+		
 		}
 		
 		return false;
@@ -706,13 +706,39 @@ public class StorageHandler {
 		try {
 			Statement st = connection.createStatement();
 			ResultSet rs = st.executeQuery(sql);
-			if(rs.next())
+			
+			
+			ArrayList<Workspace> posibleWorkspace = new ArrayList<Workspace>();
+			
+			
+			while(rs.next())
 			{
 				int workID = rs.getInt(1);
-				st.close();
-				Workspace work = getWorkspace(workID);
-				return work;
+				posibleWorkspace.add(getWorkspace(workID));
 			}
+			rs.close();
+			st.close();
+			
+			//valido que workspace es el correcto
+			for (int i = 0; i < posibleWorkspace.size(); i++) {
+				
+				Workspace tmp = posibleWorkspace.get(i);
+				ArrayList<User> usuarios = tmp.getUsers();
+				
+				ArrayList<String> usuariosS = new ArrayList<String>();
+				for (int j = 0; j < usuarios.size(); j++) 
+				{
+				usuariosS.add(usuarios.get(i).getUsername());
+				}		 
+				
+				if(usernames.containsAll(usuariosS) && usuariosS.containsAll(usernames))
+				{
+					return tmp;
+				}
+				
+			}
+			return null;
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -748,6 +774,27 @@ public class StorageHandler {
 	public boolean setInactiveWorkspace(int workspaceid)
 	{			
 		String sentence = "update workspaces set status = '"+Workspace.INACTIVO+"' where id ="+workspaceid;
+		Statement st2;
+		try {
+			st2 = connection.createStatement();
+			st2.executeUpdate(sentence);
+			st2.close();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * Método que inactiva el workspace en el q participa  un usuario.
+	 * @param workspaceId
+	 * @return true en caso de realizarlo exitosamente.
+	 */
+	public boolean setActiveWorkspace(int workspaceid)
+	{			
+		String sentence = "update workspaces set status = '"+Workspace.ACTIVO+"' where id ="+workspaceid;
 		Statement st2;
 		try {
 			st2 = connection.createStatement();

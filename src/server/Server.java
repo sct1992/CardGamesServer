@@ -9,6 +9,8 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 
+import org.apache.derby.catalog.types.UDTAliasInfo;
+
 import common.Card;
 import common.InterfaceServer;
 import common.Protocol;
@@ -304,6 +306,7 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 	 */
 	public boolean startGame(int cardId, String username,ArrayList<String> guests) {
 
+		System.out.println(username+" "+guests +" por carta " + cardId);
 		ArrayList<UserSession> guestsUsers = new ArrayList<UserSession>();
 		
 		// cojo los ussersesion q participan en el thread
@@ -311,28 +314,34 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 		UserSession creator = null;
 		
 		for (int i = 0; i < guests.size(); i++) {
-		
+
 			String tmp = guests.get(i);
 			boolean termino = false;
 			for (int j = 0; j < activeUsers.size()&& !termino; j++) {
-				
+
 				UserSession participanteTmp = activeUsers.get(j);
-				
+
 				if(tmp.equals(participanteTmp.getUserName()))
-						{
+				{
 					termino = true;
 					guestsUsers.add(participanteTmp);
-						}
-				if(username.equals(participanteTmp.getUserName()))
-				{
-					creator=participanteTmp;
-				}		
+				}
+				
 			}
 			//si no se encontro 
 			if(termino ==false)
 			{
 				return false;
 			}
+
+		}
+		
+		for(UserSession session: activeUsers)
+		{
+			if(username.equals(session.getUserName()))
+			{
+				creator=session;
+			}	
 		}
 		
 		if(creator == null)
@@ -341,6 +350,7 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 		}
 		
 		ThreadNewWorkspace tmp = new ThreadNewWorkspace(creator, guestsUsers, cardId);
+		futuredWorkspaces.add(tmp);
 		tmp.start();
 		
 		return true;
@@ -354,9 +364,12 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 	 */
 	public boolean acceptGame(String threadId, String username) {
 		
-		ThreadNewWorkspace buscado = null;
+		actualizarFuturedWorkspace();
 		
-		for (int i = 0; i < futuredWorkspaces.size(); i++) {
+		ThreadNewWorkspace buscado = null;
+		int cant = futuredWorkspaces.size();
+		
+		for (int i = 0; i < cant; i++) {
 			
 			ThreadNewWorkspace tmp = futuredWorkspaces.get(i);
 			
@@ -383,9 +396,71 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 			
 			int idWorkspace = work.getId();
 			
+			int idCard = buscado.getCardId();
+					if(idCard!= ThreadNewWorkspace.NO_CARD)
+					{
+						//valido que la carta no este en las jugadas
+						
+						ArrayList<Card> played = work.getPlayedCards();
+						boolean is = false;
+						
+						for (int i = 0; i < played.size(); i++) {
+							Card tmp = played.get(i);
+							
+							if(idCard== tmp.getId())
+							{
+								is=true;
+								break;						
+							}
+						}
+						
+						if(is==false)
+						{
+							try
+							{
+							storageHandler.proposeCard(idCard, idWorkspace);
+							}
+							catch (Exception e) {
+								
+							}
+							try
+							{
+							storageHandler.playCard(idCard, idWorkspace);
+							}
+							catch (Exception e) {
+		
+							}
+							try
+							{
+								//actualizo votos
+							int total = work.getUsers().size();
+							for (int i = 0; i < total; i++) {
+							storageHandler.voteCard(idWorkspace, idCard);
+							}
+							
+							}catch (Exception e) {
+							
+							}
+						}	
+					}
+			
+			storageHandler.setActiveWorkspace(idWorkspace);
 			buscado.sendConfirmation(idWorkspace);
 		}
 		return true;
+	}
+
+
+	private void actualizarFuturedWorkspace() {
+		
+		for (int i = 0; i < futuredWorkspaces.size(); i++) {
+			ThreadNewWorkspace tmp = futuredWorkspaces.get(i);
+			if (!tmp.isAlive())
+			{
+				futuredWorkspaces.remove(i);
+				i--;
+			}
+		}
 	}
 
 
@@ -396,6 +471,9 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 	 */
 	public boolean rejectGame(String threadId, String username) {
 
+		actualizarFuturedWorkspace();
+		
+		
 		ThreadNewWorkspace buscado = null;
 		
 		for (int i = 0; i < futuredWorkspaces.size(); i++) {
@@ -413,7 +491,7 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 			return false;
 		
 		buscado.reject();
-		buscado.sendCancelation("El usuario: "+ username + " ha rechazado la partida: \n" +  threadId );
+		buscado.sendCancelation("El usuario: "+ username + " ha rechazado la partida " +  threadId );
 		return true;
 	}
 
@@ -481,6 +559,10 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 		// sin embargo tocaria contemplar el cerrar los workspaces
 		//------------------------------------------
 		//TODO PRIMERO toca cerrar el(los) workspace antes de quitar el thread
+		
+		
+		
+		
 		for (int i = 0; i < activeUsers.size(); i++) {
 			
 			UserSession tmp = activeUsers.get(i);
@@ -508,6 +590,7 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 
 	@Override
 	public void quitWorkspace(String username, int workspace) throws Exception {
+		
 		//Desactiva el workspace
 		if(storageHandler.setInactiveWorkspace(workspace))
 		{
