@@ -5,6 +5,9 @@ import java.util.ArrayList;
 
 public class Workspace implements Serializable{
 
+	public static final String ACTIVO = "ACTIVO";
+	
+	public static final String INACTIVO = "INACTIVO";
 	
 	private int id;
 	

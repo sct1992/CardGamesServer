@@ -1,19 +1,13 @@
 package server;
 
-import java.rmi.Naming;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.awt.*;
-import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.*;
-
-import javax.swing.*;
-
-import sun.awt.windows.ThemeReader;
+import java.util.ArrayList;
 
 import common.Card;
 import common.InterfaceServer;
@@ -220,12 +214,12 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 
 	@Override
 	public boolean voteCard(int workspaceId, int cardId) {
-		boolean response = storageHandler.voteCard(workspaceId, cardId);
-		//VERIFICAR SI CUMPLE CON LA VOTACIO SUFICIENTE PARA JUGARLA
-		//TODO
-		if (response)
-			sendNotifyRefresh(workspaceId);
-		return response;
+		int  currentVotes = storageHandler.voteCard(workspaceId, cardId);
+		int max = storageHandler.getUsersWork(workspaceId).size();
+		if(currentVotes >= max)
+			storageHandler.playCard(cardId, workspaceId);
+		sendNotifyRefresh(workspaceId);
+		return true;
 	}
 
 
@@ -380,10 +374,12 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 		if(buscado.readyToCreate())
 		{
 			
-			//----------------------------------------------------
-			//TODO toca tener en cuenta cuando ya se ha creado el workspace (O SE CREA O SE CARGA)
-			//----------------------------------------------------
-			Workspace work = storageHandler.createWorkspace(buscado.getUsernamesList());
+			Workspace work;
+			//Busca el workspace dado el conjunto de usuarios
+			work = storageHandler.getWorkspaceFromUsers(buscado.getUsernamesList());
+			//Si no lo encuentra, el workspace es creado
+			if(work == null)
+				 work = storageHandler.createWorkspace(buscado.getUsernamesList());
 			
 			int idWorkspace = work.getId();
 			
@@ -479,13 +475,12 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 
 
 	@Override
-	public void quit(String username) {
-		
-		
+	public void quit(String username) {		
 		//------------------------------------------
 		//solo mato los thread, lo que me hace no visible al jugador que acabo de cerrar su programa
 		// sin embargo tocaria contemplar el cerrar los workspaces
 		//------------------------------------------
+		//TODO PRIMERO toca cerrar el(los) workspace antes de quitar el thread
 		for (int i = 0; i < activeUsers.size(); i++) {
 			
 			UserSession tmp = activeUsers.get(i);
@@ -507,22 +502,44 @@ public class Server extends UnicastRemoteObject implements InterfaceServer
 	// retornas la baraja del man, (las que ha seleccionado)
 	//----------------------------------------------------
 	public ArrayList<Card> getMyCards(String username) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		return storageHandler.getUserDeck(username);
 	}
 
 
 	@Override
 	public void quitWorkspace(String username, int workspace) throws Exception {
-
-		//cerrar workspace en bd
-		//notificar a todos los usuarios con el siguiente metodo
-		
-		UserSession d=null ;
-		d.sendPushClosedGame(-1, "prueba");
-		
-		//TODO
-		
+		//Desactiva el workspace
+		if(storageHandler.setInactiveWorkspace(workspace))
+		{
+			//obtiene los usuarios participantes del workspace
+			ArrayList<User> users = storageHandler.getUsersWork(workspace);
+			for(User user:users)
+			{
+				//A cada usuario se le envia la notificacion de que el workspace ha sido cerrado
+				//menos al usuario que lo cerro.
+				String name = user.getUsername();
+				if(!name.equals(username))
+				{
+					UserSession session = getSessionByUsername(name);
+					session.sendPushClosedGame(workspace, username);
+				}
+			}
+		}		
+	}
+	
+	/**
+	 * Método que devuelve la sesion de un usuario dado el username
+	 * @param username
+	 * @return la sesion en caso de encontrarla, null de lo contrario.
+	 */
+	public UserSession getSessionByUsername(String username)
+	{
+		for(UserSession session:activeUsers)
+		{
+			if(session.getUserName().equals(username))
+				return session;
+		}
+		return null;
 	}
 
 

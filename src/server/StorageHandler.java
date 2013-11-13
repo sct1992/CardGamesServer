@@ -405,7 +405,7 @@ public class StorageHandler {
 	 */
 	public Workspace createWorkspace(ArrayList<String> usernames)
 	{
-		String sql = "insert into workspaces(chat_history,status) values ('','ACTIVE')";
+		String sql = "insert into workspaces(chat_history,status) values ('','"+Workspace.ACTIVO+"')";
 		try {
 			PreparedStatement st = connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
 			st.executeUpdate();			
@@ -469,20 +469,26 @@ public class StorageHandler {
 	 * Método que permite realizar un voto sobre una carta en un workspace
 	 * @param workspaceId 
 	 * @param cardId
-	 * @return true en caso de registrar el voto correctamente, false de lo contrario.
+	 * @return el numero de votos que tiene esa carta en el workspace
 	 */
-	public boolean voteCard(int workspaceId, int cardId)
+	public int voteCard(int workspaceId, int cardId)
 	{
 		String sql = "update workspace_card set count_votes = count_votes +1 where id_workspace="+workspaceId+" AND id_card = "+cardId;
 		try {
 			Statement st = connection.createStatement();
 			st.executeUpdate(sql);
-			st.close();
-			return true;
+			String query =  "select count_votes from workspace_card where id_card="+cardId+" AND id_workspace="+workspaceId;
+			ResultSet rs = st.executeQuery(query);
+			if(rs.next())
+			{
+				int votes = rs.getInt(1);
+				st.close();
+				return votes;
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}		
-		return false;
+		return -1;
 	}
 	
 	/**
@@ -690,9 +696,9 @@ public class StorageHandler {
 		{
 			String username = usernames.get(i);
 			if(i == usernames.size()-1)
-				set.append("'"+username+"',");
+				set.append("'"+username+"'");
 			else
-				set.append("'"+username+"'");				
+				set.append("'"+username+"',");				
 		}
 		set.append(")");
 		//Busco el id del workspace en el que participan todos los usuarios
@@ -712,5 +718,45 @@ public class StorageHandler {
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Método que cambia el estado de Propuesta a Aceptada de una carta en un workspace
+	 * @param cardId
+	 * @param workspaceId
+	 * @return
+	 */
+	public boolean playCard(int cardId, int workspaceId)
+	{
+		String query = "update workspace_card set status='"+Card.ACCEPTED+"' where id_workspace="+workspaceId+" AND id_card="+cardId;
+		try {
+			Statement st = connection.createStatement();
+			st.executeUpdate(query);
+			st.close();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	/**
+	 * Método que inactiva el workspace en el q participa  un usuario.
+	 * @param workspaceId
+	 * @return true en caso de realizarlo exitosamente.
+	 */
+	public boolean setInactiveWorkspace(int workspaceid)
+	{			
+		String sentence = "update workspaces set status = '"+Workspace.INACTIVO+"' where id ="+workspaceid;
+		Statement st2;
+		try {
+			st2 = connection.createStatement();
+			st2.executeUpdate(sentence);
+			st2.close();
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 }
